@@ -1,0 +1,253 @@
+<!DOCTYPE html>
+<html lang="zh">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>XPlayer</title>
+  <script src="dist/js/jquery-3.5.1.min.js"></script>
+  <script type="text/javascript" src="dist/player/common.js"></script>
+  <script type="text/javascript" src="dist/player/webgl.js"></script>
+  <script type="text/javascript" src="dist/player/pcm-player.js"></script>
+  <script type="text/javascript" src="dist/player/player.js"></script>
+  <link rel="stylesheet" href="dist/css/video.css" />
+  <style>
+    html,
+    body {
+      margin: 0;
+      padding: 0;
+      overflow: hidden;
+      height: 100%;
+      width: 100%;
+    }
+  </style>
+</head>
+<script type="text/javascript">
+  var websocketUrl = 'ws://' + window.location.host + '/ws'
+  var players = new Array()
+  var channelCount
+  //get para from url
+  var $_GET = (function () {
+    var url = window.document.location.href.toString() //获取的完整url
+    var u = url.split('?')
+    if (typeof u[1] == 'string') {
+      u = u[1].split('&')
+      var get = {}
+      for (var i in u) {
+        var j = u[i].split('=')
+        get[j[0]] = j[1]
+      }
+      return get
+    } else {
+      return {}
+    }
+  })()
+
+  // resize pannel count
+  function initPannel(channelArray) {
+    if (channelArray.length > 1 && channelArray.length <= 2) {
+      $('.video-2').css('display', 'block')
+      channelCount = 2
+    } else if (channelArray.length > 2 && channelArray.length <= 4) {
+      $('.video-4').css('display', 'block')
+      channelCount = 4
+    } else if (channelArray.length > 4 && channelArray.length <= 6) {
+      $('.video-6').css('display', 'block')
+      channelCount = 6
+    } else if (channelArray.length > 6 && channelArray.length <= 9) {
+      $('.video-9').css('display', 'block')
+      channelCount = 9
+    } else if (channelArray.length > 9 && channelArray.length <= 16) {
+      $('.video-16').css('display', 'block')
+      channelCount = 16
+    } else {
+      $('.video-1').css('display', 'block')
+      channelCount = 1
+    }
+  }
+
+  // 添加控制按钮
+  function appendControl(pannel, index, deviceId, chl, autoPlay) {
+    let vx = pannel.parent()
+    let ctrlHtml = '<div class="sidebar">'
+    ctrlHtml += '<span class="left">' + deviceId + ' ch' + chl + '</span>'
+    ctrlHtml += '<img src="dist/img/fullscreen.png" data-vidx="' + index + '"class="video-ctrl right fullscreen"></img>'
+    ctrlHtml += '<img src="dist/img/volume.png" data-vidx="' + index + '"class="video-ctrl right volume"></img>'
+    if (autoPlay === 1) {
+      ctrlHtml += '<img src="dist/img/pause.png" data-vidx="' + index + '"class="video-ctrl right videoPlay"></img>'
+    } else {
+      ctrlHtml += '<img src="dist/img/play.png" data-vidx="' + index + '"class="video-ctrl right videoPlay"></img>'
+    }
+    ctrlHtml += '</div>'
+    vx.append(ctrlHtml)
+  }
+
+  $(function () {
+    var deviceId = $_GET['deviceId']
+    var token = $_GET['token']
+    var stream = parseInt($_GET['stream'])
+    var channelArray = $_GET['channels'].split('_')
+    var autoPlay = parseInt($_GET['auto'])
+    initPannel(channelArray)
+    for (var i = 0; i < channelArray.length; i++) {
+      var obj = $('.video-' + channelCount + ' #video-ch' + (i + 1))
+      var chl = parseInt(channelArray[i])
+      appendControl(obj, i, deviceId, chl, autoPlay)
+      players[i] = new WasmPlayer(websocketUrl, obj.get(0), deviceId, chl, stream, token, autoPlay)
+    }
+
+    // 全屏
+    $('.fullscreen').click(function () {
+      players[$(this).data('vidx')].fullscreen()
+    })
+
+    // 开始暂停
+    $('.videoPlay').click(function () {
+      let player = players[$(this).data('vidx')]
+      if (player.isPlaying()) {
+        $(this).attr('src', 'dist/img/play.png')
+        player.stop()
+      } else {
+        $(this).attr('src', 'dist/img/pause.png')
+        player.play()
+      }
+    })
+
+    // 声音控制
+    $('.volume').click(function () {
+      players[$(this).data('vidx')].volume()
+    })
+  })
+</script>
+
+<body>
+  <div class="video-1 pannel" style="display: none">
+    <div class="video" style="width: 100%; height: 100%">
+      <canvas id="video-ch1"></canvas>
+    </div>
+  </div>
+  <div class="video-2 pannel" style="display: none">
+    <div class="video" style="width: 50%; height: 100%">
+      <canvas id="video-ch1"></canvas>
+    </div>
+    <div class="video" style="left: 50%; width: 50%; height: 100%">
+      <canvas id="video-ch2"></canvas>
+    </div>
+  </div>
+  <div class="video-4 pannel" style="display: none">
+    <div class="video" style="width: 50%; height: 50%">
+      <canvas id="video-ch1"></canvas>
+    </div>
+    <div class="video" style="left: 50%; width: 50%; height: 50%">
+      <canvas id="video-ch2"></canvas>
+    </div>
+    <div class="video" style="top: 50%; width: 50%; height: 50%">
+      <canvas id="video-ch3"></canvas>
+    </div>
+    <div class="video" style="left: 50%; top: 50%; width: 50%; height: 50%">
+      <canvas id="video-ch4"></canvas>
+    </div>
+  </div>
+  <div class="video-6 pannel" style="display: none">
+    <div class="video" style="width: 66.6%; height: 66.6%">
+      <canvas id="video-ch1"></canvas>
+    </div>
+    <div class="video" style="top: 66.6%; width: 33.3%; height: 33.3%">
+      <canvas id="video-ch2"></canvas>
+    </div>
+    <div class="video" style="top: 66.6%; left: 33.3%; width: 33.3%; height: 33.3%">
+      <canvas id="video-ch3"></canvas>
+    </div>
+    <div class="video" style="left: 66.6%; width: 33.3%; height: 33.3%">
+      <canvas id="video-ch4"></canvas>
+    </div>
+    <div class="video" style="top: 33.3%; left: 66.6%; width: 33.3%; height: 33.3%">
+      <canvas id="video-ch5"></canvas>
+    </div>
+    <div class="video" style="left: 66.6%; top: 66.6%; width: 33.3%; height: 33.3%">
+      <canvas id="video-ch6"></canvas>
+    </div>
+  </div>
+  <div class="video-9 pannel" style="display: none">
+    <div class="video" style="width: 33.3%; height: 33.3%">
+      <canvas id="video-ch1"></canvas>
+    </div>
+    <div class="video" style="left: 33.3%; width: 33.3%; height: 33.3%">
+      <canvas id="video-ch2"></canvas>
+    </div>
+    <div class="video" style="left: 66.6%; width: 33.3%; height: 33.3%">
+      <canvas id="video-ch3"></canvas>
+    </div>
+    <div class="video" style="top: 33.3%; width: 33.3%; height: 33.3%">
+      <canvas id="video-ch4"></canvas>
+    </div>
+    <div class="video" style="left: 33.3%; top: 33.3%; width: 33.3%; height: 33.3%">
+      <canvas id="video-ch5"></canvas>
+    </div>
+    <div class="video" style="left: 66.6%; top: 33.3%; width: 33.3%; height: 33.3%">
+      <canvas id="video-ch6"></canvas>
+    </div>
+    <div class="video" style="top: 66.6%; width: 33.3%; height: 33.3%">
+      <canvas id="video-ch7"></canvas>
+    </div>
+    <div class="video" style="left: 33.3%; top: 66.6%; width: 33.3%; height: 33.3%">
+      <canvas id="video-ch8"></canvas>
+    </div>
+    <div class="video" style="left: 66.6%; top: 66.6%; width: 33.3%; height: 33.3%">
+      <canvas id="video-ch9"></canvas>
+    </div>
+  </div>
+  <div class="vidoe-16 pannel" style="display: none">
+    <div class="video" style="width: 25%; height: 25%">
+      <canvas id="video-ch1"></canvas>
+    </div>
+    <div class="video" style="left: 25%; width: 25%; height: 25%">
+      <canvas id="video-ch2"></canvas>
+    </div>
+    <div class="video" style="left: 50%; width: 25%; height: 25%">
+      <canvas id="video-ch3"></canvas>
+    </div>
+    <div class="video" style="left: 75%; width: 25%; height: 25%">
+      <canvas id="video-ch4"></canvas>
+    </div>
+    <div class="video" class="video" style="top: 25%; width: 25%; height: 25%">
+      <canvas id="video-ch5"></canvas>
+    </div>
+    <div class="video" style="top: 25%; left: 25%; width: 25%; height: 25%">
+      <canvas id="video-ch6"></canvas>
+    </div>
+    <div class="video" style="top: 25%; left: 50%; width: 25%; height: 25%">
+      <canvas id="video-ch7"></canvas>
+    </div>
+    <div class="video" style="top: 25%; left: 75%; width: 25%; height: 25%">
+      <canvas id="video-ch8"></canvas>
+    </div>
+    <div class="video" style="top: 50%; width: 25%; height: 25%">
+      <canvas id="video-ch9"></canvas>
+    </div>
+    <div class="video" style="top: 50%; left: 25%; width: 25%; height: 25%">
+      <canvas id="video-ch10"></canvas>
+    </div>
+    <div class="video" style="top: 50%; left: 50%; width: 25%; height: 25%">
+      <canvas id="video-ch11"></canvas>
+    </div>
+    <div class="video" style="top: 50%; left: 75%; width: 25%; height: 25%">
+      <canvas id="video-ch12"></canvas>
+    </div>
+    <div class="video" style="top: 75%; width: 25%; height: 25%">
+      <canvas id="video-ch13"></canvas>
+    </div>
+    <div class="video" style="top: 75%; left: 25%; width: 25%; height: 25%">
+      <canvas id="video-ch14"></canvas>
+    </div>
+    <div class="video" style="top: 75%; left: 50%; width: 25%; height: 25%">
+      <canvas id="video-ch15"></canvas>
+    </div>
+    <div class="video" style="top: 75%; left: 75%; width: 25%; height: 25%">
+      <canvas id="video-ch16"></canvas>
+    </div>
+  </div>
+</body>
+
+</html>

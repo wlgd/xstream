@@ -1,0 +1,13 @@
+{
+  "singleQuote": true,
+  "semi": false,
+  "printWidth": 200,
+  "vetur.format.defaultFormatter.html": "prettier",
+  "useTabs": false,
+  "[javascript]": {
+    "editor.defaultFormatter": "esbenp.prettier-vscode"
+  },
+  "[html]": {
+    "editor.defaultFormatter": "esbenp.prettier-vscode"
+}
+}

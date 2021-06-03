@@ -1,0 +1,43 @@
+.pannel {
+  top: 10%;
+  bottom: 10%;
+  left: 20%;
+  right: 20%;
+  border: solid 1px #dcdcdc;
+  position: absolute;
+}
+
+.pannel .video {
+  position: absolute;
+  border: solid 1px #dcdcdc;
+  width: 100%;
+  height: 100%;
+}
+
+canvas {
+  width: 100%;
+  height: calc(100% - 30px);
+  background: gray;
+  display: block;
+}
+
+.pannel .sidebar {
+  height: 30px;
+  display: inline;
+}
+
+.sidebar span {
+  display: inline-block;
+  width: 120px;
+  margin-left: 5px;
+}
+
+.sidebar .right {
+  width: 28px;
+  float: right;
+  margin-left: 10px;
+}
+
+.video-ctrl:hover {
+  transform: scale(1.4);
+}

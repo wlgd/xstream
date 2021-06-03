@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html lang="zh">
+  <head>
+    <meta charset="UTF-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>XPlayer</title>
+    <script src="dist/js/jquery-3.5.1.min.js"></script>
+    <script type="text/javascript" src="dist/player/common.js"></script>
+    <script type="text/javascript" src="dist/player/webgl.js"></script>
+    <script type="text/javascript" src="dist/player/pcm-player.js"></script>
+    <script type="text/javascript" src="dist/player/player.js"></script>
+    <link rel="stylesheet" href="dist/css/video.css" />
+    <style>
+      html,
+      body {
+        margin: 0;
+        padding: 0;
+        overflow: hidden;
+        height: 100%;
+        width: 100%;
+      }
+    </style>
+  </head>
+  <script type="text/javascript">
+    var player = null
+    // 添加控制按钮
+    function appendControl(pannel) {
+      let vx = pannel.parent()
+      let ctrlHtml = '<div class="sidebar">'
+      ctrlHtml += '<input id="videoUrl" class="left" style="width: 50%"></input>'
+      ctrlHtml += '<img src="dist/img/fullscreen.png" class="video-ctrl right fullscreen"></img>'
+      ctrlHtml += '<img src="dist/img/play.png" class="video-ctrl right videoPlay"></img>'
+      ctrlHtml += '<img src="dist/img/volume.png" class="video-ctrl right volume"></img>'
+      ctrlHtml += '</div>'
+      vx.append(ctrlHtml)
+    }
+
+    $(function () {
+      var obj = $('#video')
+      appendControl(obj)
+      // 全屏
+      $('.fullscreen').click(function () {
+        player.fullscreen()
+      })
+
+      // 开始暂停
+      $('.videoPlay').click(function () {
+        player = new WasmPlayer($('#videoUrl').val(), obj.get(0))
+        if (player.isPlaying()) {
+          $(this).attr('src', 'dist/img/play.png')
+          player.stop()
+        } else {
+          $(this).attr('src', 'dist/img/pause.png')
+          player.play()
+        }
+      })
+
+      // 声音控制
+      $('.volume').click(function () {
+        player.volume()
+      })
+    })
+  </script>
+
+  <body>
+    <div class="video-1 pannel" style="display: block">
+      <canvas style="width: 100%; height: 100%" id="video"></canvas>
+    </div>
+  </body>
+</html>

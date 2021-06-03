@@ -1,0 +1,7 @@
+### 服务信息
+GUID="Dhld4zuc69Y6OIbNRIKUtN"
+UnattendedTime=30.0
+
+### 上级服务地址
+[Superior]
+GetUrl="http://127.0.0.1:12100/xstation/api/serve/get"
