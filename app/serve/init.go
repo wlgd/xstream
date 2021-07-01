@@ -6,9 +6,9 @@ import (
 	"log"
 	"time"
 	"xstream/configs"
-	"xstream/pkg"
-	"xstream/pkg/rpc"
-	"xstream/pkg/utils"
+
+	"github.com/wlgd/xutils"
+	"github.com/wlgd/xutils/rpc"
 )
 
 var (
@@ -22,8 +22,8 @@ func serveGet() error {
 		return errors.New("please set superior address firstly")
 	}
 	url := fmt.Sprintf("%s/%s", configs.Default.Superior.GetUrl, configs.Default.GUID)
-	if err := utils.HttpGet(url, &configs.Services); err != nil {
-		return pkg.ErrStationLogin
+	if err := xutils.HttpGet(url, &configs.Services); err != nil {
+		return xutils.ErrLogin
 	}
 	if configs.Services.Local.Status != rpc.ServeStatusOk {
 		return errors.New("the service has been disabled")
@@ -58,7 +58,7 @@ func Run() error {
 	if err := serveGet(); err != nil {
 		return err
 	}
-	configs.LocalIpAddr = utils.PublicIPAddr()
+	configs.LocalIpAddr = xutils.PublicIPAddr()
 	// 初始化xproto
 	go xprotoStart(configs.Services.Local.AccessPort)
 	go func() {
