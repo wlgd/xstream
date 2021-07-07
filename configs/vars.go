@@ -3,7 +3,7 @@ package configs
 // xserverOpt 服务配置信息
 type xserverOpt struct {
 	Name       string `json:"name"`
-	Port       uint16 `json:"port"`
+	HttpPort   uint16 `json:"httpPort"`
 	AccessPort uint16 `json:"accessPort"`
 	RpcPort    uint16 `json:"rpcPort"`
 	Status     int    `json:"status"`

@@ -18,15 +18,17 @@ func newApp() *gin.Engine {
 	return r
 }
 
-// Init 路由初始化
-func Init(port uint16) *http.Server {
+// Start 路由
+func Start(port uint16) *http.Server {
 	r := newApp()
 	address := fmt.Sprintf(":%d", port)
-	return &http.Server{
+	s := &http.Server{
 		Addr:           address,
 		Handler:        r,
 		ReadTimeout:    30 * time.Second,
 		WriteTimeout:   10 * time.Second,
 		MaxHeaderBytes: 1 << 20,
 	}
+	go s.ListenAndServe()
+	return s
 }

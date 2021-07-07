@@ -60,10 +60,13 @@ func Run() error {
 	}
 	configs.LocalIpAddr = xutils.PublicIPAddr()
 	// 初始化xproto
-	go xprotoStart(configs.Services.Local.AccessPort)
+	if err := xprotoStart(configs.Services.Local.AccessPort); err != nil {
+		return err
+	}
 	go func() {
 		loginServer()
 		ticker := time.NewTicker(time.Second * 60)
+		defer ticker.Stop()
 		for {
 			<-ticker.C
 			if err := loginServer(); err != nil {

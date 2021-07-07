@@ -1,7 +1,6 @@
 package serve
 
 import (
-	"log"
 	"xstream/app/controller"
 
 	"github.com/wlgd/xproto"
@@ -27,23 +26,20 @@ var (
 	_xproto *xproto.Serve = nil
 )
 
-// xprotoStart 启动access服务
-func xprotoStart(port uint16) {
-	_xproto = &xproto.Serve{
-		RequestTimeOut: 30,
-		RecvTimeout:    60,
-		Adapter:        protocolAdapter,
-	}
+// xprotoStart 启动
+func xprotoStart(port uint16) error {
 	xnotify := controller.NewXNotify()
-	_xproto.SetNotifyOfLinkAccess(xnotify.AccessHandler)
-	_xproto.SetNotifyOfAVFrame(xnotify.AVFrameHandler)
-	log.Printf("XProto Serve Start %d\n", port)
-	if err := _xproto.ListenAndServe(port); err != nil {
-		log.Fatalln("localAccess", err)
-	}
+	s, err := xproto.NewServe(xproto.Options{
+		Port:             port,
+		Adapter:          protocolAdapter,
+		LinkAccessNotify: xnotify.AccessHandler,
+		AVFrameNotify:    xnotify.AVFrameHandler,
+	})
+	_xproto = s
+	return err
 }
 
-// xprotoStop 停止access服务
+// xprotoStop 停止
 func xprotoStop() {
-	_xproto.Close()
+	_xproto.Release()
 }
